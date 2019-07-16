@@ -3,10 +3,14 @@ require 'securerandom'
 GRID_HEIGHT = 12
 GRID_WIDTH = 12
 MAX_PEOPLE = 100
+NUM_FACTIONS = 3
 
-Tile = Struct.new(:terrain, :name, :num_people, :x, :y)
+Faction = Struct.new(:name)
+Tile = Struct.new(:terrain, :name, :num_people, :faction, :x, :y)
 Actor = Struct.new(:race, :name, :alignment, :faction)
 Race = Struct.new(:name, :description)
+
+INDEPENDANT = Faction.new("independant")
 
 def random_name
   SecureRandom.uuid
@@ -22,24 +26,30 @@ def random_race
   Race.new(:monster, "head of a chicken, body of a squirrel and claws of a tiger")
 end
 
-def generate_tiles(width, height)
+def generate_factions(num_factions)
+  0.upto(num_factions).map do
+    Faction.new(random_name)
+  end
+end
+
+def generate_tiles(factions, width, height)
   0.upto(width).map do |x|
     0.upto(height).map do |y|
-      Tile.new(:grassland, random_name, num_people, x, y)
+      Tile.new(:grassland, random_name, num_people, factions.sample, x, y)
     end
   end
 end
 
 def generate_creatures(tiles, chance_to_spawn)
   tiles.flatten.map do |_tile|
-    Actor.new(random_race, random_name, :evil, :independant) if rand > chance_to_spawn
+    Actor.new(random_race, random_name, :evil, INDEPENDANT) if rand > chance_to_spawn
   end.compact
 end
 
 def pre_world
-  tiles = generate_tiles(GRID_WIDTH, GRID_HEIGHT)
+  factions = generate_factions(NUM_FACTIONS)
+  tiles = generate_tiles(factions, GRID_WIDTH, GRID_HEIGHT)
   creatures = generate_creatures(tiles, 0.8)
-  # generate_civilizations
   #generate_communities
 end
 
