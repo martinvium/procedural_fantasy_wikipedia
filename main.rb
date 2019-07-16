@@ -4,11 +4,13 @@ GRID_HEIGHT = 12
 GRID_WIDTH = 12
 MAX_PEOPLE = 100
 NUM_FACTIONS = 3
+CITY_POPULATION_THRESHOLD = 50
 
 Faction = Struct.new(:name)
-Tile = Struct.new(:terrain, :name, :num_people, :faction, :x, :y)
-Actor = Struct.new(:race, :name, :alignment, :faction)
+Tile = Struct.new(:terrain, :name, :population, :faction, :x, :y)
+Actor = Struct.new(:race, :name, :alignment, :faction, :tile)
 Race = Struct.new(:name, :description)
+City = Struct.new(:name, :tile)
 
 INDEPENDANT = Faction.new("independant")
 
@@ -16,7 +18,7 @@ def random_name
   SecureRandom.uuid
 end
 
-def num_people
+def generate_population
   return 0 if rand > 0.5
 
   rand(MAX_PEOPLE)
@@ -35,22 +37,28 @@ end
 def generate_tiles(factions, width, height)
   0.upto(width).map do |x|
     0.upto(height).map do |y|
-      Tile.new(:grassland, random_name, num_people, factions.sample, x, y)
+      Tile.new(:grassland, random_name, generate_population, factions.sample, x, y)
     end
   end
 end
 
 def generate_creatures(tiles, chance_to_spawn)
-  tiles.flatten.map do |_tile|
-    Actor.new(random_race, random_name, :evil, INDEPENDANT) if rand > chance_to_spawn
+  tiles.flatten.map do |tile|
+    Actor.new(random_race, random_name, :evil, INDEPENDANT, tile) if rand > chance_to_spawn
   end.compact
+end
+
+def generate_cities(tiles, threshold)
+  tiles.flatten.map do |tile|
+    City.new(random_name, tile) if tile.population > threshold
+  end
 end
 
 def pre_world
   factions = generate_factions(NUM_FACTIONS)
   tiles = generate_tiles(factions, GRID_WIDTH, GRID_HEIGHT)
   creatures = generate_creatures(tiles, 0.8)
-  #generate_communities
+  generate_cities(tiles, CITY_POPULATION_THRESHOLD)
 end
 
 def step
