@@ -3,7 +3,7 @@ require_relative "main"
 
 class MainTest < Minitest::Test
   def test_generate_tiles
-    assert_equal(25, generate_tiles([Faction.new], 4, 4).flatten.count)
+    assert_equal(16, generate_tiles([Faction.new], 4, 4).flatten.count)
   end
 
   def test_generate_creatures
@@ -26,6 +26,30 @@ class MainTest < Minitest::Test
   def test_skips_city_when_below_threshold
     tiles = [create_tile(population: 50)]
     assert_nil(generate_cities(tiles, 100).first)
+  end
+
+  def test_generate_seasons
+    assert_equal([
+      Season.new("Summer"),
+      Season.new("Fall"),
+      Season.new("Winter"),
+      Season.new("Spring"),
+      Season.new("Summer"),
+      Season.new("Fall"),
+      Season.new("Winter"),
+      Season.new("Spring")
+    ], generate_seasons(8))
+  end
+
+  def test_generate_events
+    assert_equal([
+      Event.new("Season changed: Summer"),
+      Event.new("Season changed: Fall")
+    ], generate_events(2))
+  end
+
+  def test_main
+    assert_equal(100, main.count)
   end
 
   def create_tile(population:)
