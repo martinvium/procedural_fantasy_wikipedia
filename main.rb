@@ -1,4 +1,4 @@
-require 'securerandom'
+require "securerandom"
 
 GRID_HEIGHT = 12
 GRID_WIDTH = 12
@@ -21,7 +21,7 @@ SEASONS = [
   Season.new("Summer"),
   Season.new("Fall"),
   Season.new("Winter"),
-  Season.new("Spring")
+  Season.new("Spring"),
 ]
 
 def random_name
@@ -53,9 +53,9 @@ def generate_tiles(factions, width, height)
 end
 
 def generate_creatures(tiles, chance_to_spawn)
-  tiles.flatten.map do |tile|
+  tiles.flatten.map { |tile|
     Actor.new(random_race, random_name, :evil, INDEPENDANT, tile) if rand > chance_to_spawn
-  end.compact
+  }.compact
 end
 
 def generate_cities(tiles, threshold)
@@ -69,9 +69,9 @@ def generate_seasons(num_seasons)
 end
 
 def generate_events(num_seasons)
-  generate_seasons(num_seasons).map do |season|
+  generate_seasons(num_seasons).map { |season|
     [Event.new("Season changed: #{season.name}")]
-  end.flatten
+  }.flatten
 end
 
 def main

@@ -37,14 +37,14 @@ class MainTest < Minitest::Test
       Season.new("Summer"),
       Season.new("Fall"),
       Season.new("Winter"),
-      Season.new("Spring")
+      Season.new("Spring"),
     ], generate_seasons(8))
   end
 
   def test_generate_events
     assert_equal([
       Event.new("Season changed: Summer"),
-      Event.new("Season changed: Fall")
+      Event.new("Season changed: Fall"),
     ], generate_events(2))
   end
 
