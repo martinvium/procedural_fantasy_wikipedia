@@ -22,27 +22,24 @@ def random_race
   Race.new(:monster, "head of a chicken, body of a squirrel and claws of a tiger")
 end
 
-def generate_tiles
-  0.upto(GRID_HEIGHT).map do |x|
-    0.upto(GRID_WIDTH).map do |y|
+def generate_tiles(width, height)
+  0.upto(width).map do |x|
+    0.upto(height).map do |y|
       Tile.new(:grassland, random_name, num_people, x, y)
     end
   end
 end
 
-def generate_creatures(tiles)
-  tiles.map do |row|
-    row.map do |tile|
-      Actor.new(random_race, random_name, :evil, :independant) if rand > 0.8
-    end
-  end.flatten.compact
+def generate_creatures(tiles, chance_to_spawn)
+  tiles.flatten.map do |_tile|
+    Actor.new(random_race, random_name, :evil, :independant) if rand > chance_to_spawn
+  end.compact
 end
 
 def pre_world
-  tiles = generate_tiles
-  creatures = generate_creatures(tiles)
-  return creatures
-  #generate_civilizations
+  tiles = generate_tiles(GRID_WIDTH, GRID_HEIGHT)
+  creatures = generate_creatures(tiles, 0.8)
+  # generate_civilizations
   #generate_communities
 end
 
