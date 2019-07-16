@@ -4,7 +4,9 @@ GRID_HEIGHT = 12
 GRID_WIDTH = 12
 MAX_PEOPLE = 100
 
-Tile = Struct.new(:type, :name, :num_people)
+Tile = Struct.new(:terrain, :name, :num_people, :x, :y)
+Actor = Struct.new(:race, :name, :alignment, :faction)
+Race = Struct.new(:name, :description)
 
 def random_name
   SecureRandom.uuid
@@ -16,25 +18,32 @@ def num_people
   rand(MAX_PEOPLE)
 end
 
-def generate_locations
-  0.upto(GRID_HEIGHT).map do
-    0.upto(GRID_WIDTH).map do
-      Tile.new(
-        :grassland,
-        random_name,
-        num_people
-      )
+def random_race
+  Race.new(:monster, "head of a chicken, body of a squirrel and claws of a tiger")
+end
+
+def generate_tiles
+  0.upto(GRID_HEIGHT).map do |x|
+    0.upto(GRID_WIDTH).map do |y|
+      Tile.new(:grassland, random_name, num_people, x, y)
     end
   end
 end
 
-def pre_world
-  locations = generate_locations
+def generate_creatures(tiles)
+  tiles.map do |row|
+    row.map do |tile|
+      Actor.new(random_race, random_name, :evil, :independant) if rand > 0.8
+    end
+  end.flatten.compact
+end
 
-  return locations
-  generate_creatures
-  generate_civilizations
-  generate_communities
+def pre_world
+  tiles = generate_tiles
+  creatures = generate_creatures(tiles)
+  return creatures
+  #generate_civilizations
+  #generate_communities
 end
 
 def step
@@ -48,4 +57,4 @@ def output
   end
 end
 
-pp pre_world.flatten.inspect
+pp pre_world.count
