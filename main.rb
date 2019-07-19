@@ -5,7 +5,7 @@ GRID_WIDTH = 12
 MAX_PEOPLE = 100
 NUM_FACTIONS = 3
 CITY_POPULATION_THRESHOLD = 50
-NUM_SEASONS = 100
+NUM_SEASONS = 8
 CREATURE_SPAWN_RATE = 0.9
 
 Faction = Struct.new(:name)
@@ -26,10 +26,15 @@ SEASONS = [
 ]
 
 CREATURE_EVENTS = [
-  lambda { |factions, tile, a|
-    b = new_hero(factions.sample, tile)
-    generate_combat_event(a, b)
-  }
+  lambda { |factions, tile, creature|
+    subject = new_hero(factions.sample, tile)
+    winner, looser = [creature, subject].shuffle
+    Event.new("#{winner.name} killed #{looser.name} in combat")
+  },
+  lambda { |factions, tile, creature|
+    subject = new_hero(factions.sample, tile)
+    Event.new("#{subject.name} was kidnapped by #{creature.name}")
+  },
 ]
 
 def random_name
@@ -86,13 +91,8 @@ end
 
 def world_events(season)
   [
-    Event.new("Season changed: #{season.name}")
+    Event.new("Season changed: #{season.name}"),
   ]
-end
-
-def generate_combat_event(a, b)
-  winner, looser = [a, b].shuffle
-  Event.new("#{winner.name} (#{winner.race.name}) killed #{looser.name} (#{looser.race.name})")
 end
 
 def creature_events(creatures, factions)
@@ -110,4 +110,10 @@ def main
   generate_seasons(NUM_SEASONS).map { |season|
     world_events(season) + creature_events(creatures, factions)
   }.flatten
+end
+
+if $0 == __FILE__
+  main.each do |event|
+    puts event.title
+  end
 end
