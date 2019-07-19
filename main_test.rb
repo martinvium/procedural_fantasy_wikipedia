@@ -19,12 +19,12 @@ class MainTest < Minitest::Test
   end
 
   def test_generates_city
-    tiles = [create_tile(population: 150)]
+    tiles = [build_tile(population: 150)]
     assert_kind_of(City, generate_cities(tiles, 100).first)
   end
 
   def test_skips_city_when_below_threshold
-    tiles = [create_tile(population: 50)]
+    tiles = [build_tile(population: 50)]
     assert_nil(generate_cities(tiles, 100).first)
   end
 
@@ -41,18 +41,28 @@ class MainTest < Minitest::Test
     ], generate_seasons(8))
   end
 
-  def test_generate_events
-    assert_equal([
-      Event.new("Season changed: Summer"),
-      Event.new("Season changed: Fall"),
-    ], generate_events(2))
+  def test_world_events
+    assert_equal(
+      [Event.new("Season changed: Fall")],
+      world_events(Season.new("Fall"))
+    )
+  end
+
+  def test_creature_events
+    tile = Tile.new
+    tile.population = 1
+    creature = new_creature(tile)
+
+    actual = creature_events([creature], [INDEPENDANT])
+
+    assert_kind_of(Event, actual.first)
   end
 
   def test_main
-    assert_equal(100, main.count)
+    assert_operator(100, :<, main.count)
   end
 
-  def create_tile(population:)
+  def build_tile(population:)
     Tile.new(:grassland, "tile name", population)
   end
 end

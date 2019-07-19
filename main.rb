@@ -6,6 +6,7 @@ MAX_PEOPLE = 100
 NUM_FACTIONS = 3
 CITY_POPULATION_THRESHOLD = 50
 NUM_SEASONS = 100
+CREATURE_SPAWN_RATE = 0.9
 
 Faction = Struct.new(:name)
 Tile = Struct.new(:terrain, :name, :population, :faction, :x, :y)
@@ -52,9 +53,17 @@ def generate_tiles(factions, width, height)
   end
 end
 
+def new_creature(tile)
+  Actor.new(random_race, random_name, :evil, INDEPENDANT, tile)
+end
+
+def new_hero(faction, tile)
+  Actor.new(random_race, random_name, :good, faction, tile)
+end
+
 def generate_creatures(tiles, chance_to_spawn)
   tiles.flatten.map { |tile|
-    Actor.new(random_race, random_name, :evil, INDEPENDANT, tile) if rand > chance_to_spawn
+    new_creature(tile) if rand > chance_to_spawn
   }.compact
 end
 
@@ -68,16 +77,31 @@ def generate_seasons(num_seasons)
   (0...num_seasons).map { |i| SEASONS[i % 4] }
 end
 
-def generate_events(num_seasons)
-  generate_seasons(num_seasons).map { |season|
-    [Event.new("Season changed: #{season.name}")]
-  }.flatten
+def world_events(season)
+  [
+    Event.new("Season changed: #{season.name}"),
+  ]
+end
+
+def generate_combat_event(a, b)
+  winner, looser = [a, b].shuffle
+  Event.new("#{winner.name} (#{winner.race.name}) killed #{looser.name} (#{looser.race.name})")
+end
+
+def creature_events(creatures, factions)
+  creatures.map do |creature|
+    hero = new_hero(factions.sample, creature.tile)
+    generate_combat_event(creature, hero)
+  end
 end
 
 def main
   factions = generate_factions(NUM_FACTIONS)
   tiles = generate_tiles(factions, GRID_WIDTH, GRID_HEIGHT)
-  creatures = generate_creatures(tiles, 0.8)
+  creatures = generate_creatures(tiles, CREATURE_SPAWN_RATE)
   generate_cities(tiles, CITY_POPULATION_THRESHOLD)
-  generate_events(NUM_SEASONS)
+
+  generate_seasons(NUM_SEASONS).map { |season|
+    world_events(season) + creature_events(creatures, factions)
+  }.flatten
 end
