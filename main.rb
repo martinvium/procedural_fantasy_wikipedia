@@ -25,6 +25,13 @@ SEASONS = [
   Season.new("Spring"),
 ]
 
+CREATURE_EVENTS = [
+  lambda { |factions, tile, a|
+    b = new_hero(factions.sample, tile)
+    generate_combat_event(a, b)
+  }
+]
+
 def random_name
   SecureRandom.uuid
 end
@@ -79,7 +86,7 @@ end
 
 def world_events(season)
   [
-    Event.new("Season changed: #{season.name}"),
+    Event.new("Season changed: #{season.name}")
   ]
 end
 
@@ -90,8 +97,7 @@ end
 
 def creature_events(creatures, factions)
   creatures.map do |creature|
-    hero = new_hero(factions.sample, creature.tile)
-    generate_combat_event(creature, hero)
+    CREATURE_EVENTS.sample.call(factions, creature.tile, creature)
   end
 end
 
