@@ -15,6 +15,7 @@ Race = Struct.new(:name, :description)
 City = Struct.new(:name, :tile)
 Season = Struct.new(:name)
 Event = Struct.new(:title)
+World = Struct.new(:factions, :tiles, :cities, :heroes)
 
 INDEPENDANT = Faction.new("independant")
 
@@ -25,20 +26,28 @@ SEASONS = [
   Season.new("Spring"),
 ]
 
-def attack_action(factions, tile, protagonist)
-  subject = new_hero(factions.sample, tile)
+def attack_action(world, tile, protagonist)
+  subject = new_hero(world.factions.sample, tile)
   winner, looser = [protagonist, subject].shuffle
   Event.new("#{winner.name} killed #{looser.name} in combat")
 end
 
-def kidnap_action(factions, tile, protagonist)
-  subject = new_hero(factions.sample, tile)
+def kidnap_action(world, tile, protagonist)
+  subject = new_hero(world.factions.sample, tile)
   Event.new("#{subject.name} was kidnapped by #{protagonist.name}")
+end
+
+def raze_city_action(world, tile, protagonist)
+  city = world.cities.find { |city| city.tile === tile }
+  return if city.nil?
+
+  Event.new("#{protagonist.name} attacked the city of #{city.name}, during the dark of night, and razed it to the ground")
 end
 
 CREATURE_ACTIONS = [
   method(:attack_action),
   method(:kidnap_action),
+  method(:raze_city_action),
 ]
 
 def random_name
@@ -84,9 +93,9 @@ def generate_creatures(tiles, chance_to_spawn)
 end
 
 def generate_cities(tiles, threshold)
-  tiles.flatten.map do |tile|
+  tiles.flatten.map { |tile|
     City.new(random_name, tile) if tile.population > threshold
-  end
+  }.compact
 end
 
 def generate_seasons(num_seasons)
@@ -99,9 +108,9 @@ def world_events(season)
   ]
 end
 
-def creature_events(creatures, factions)
+def creature_events(creatures, world)
   creatures.map do |creature|
-    CREATURE_ACTIONS.sample.call(factions, creature.tile, creature)
+    CREATURE_ACTIONS.sample.call(world, creature.tile, creature)
   end
 end
 
@@ -109,10 +118,13 @@ def main
   factions = generate_factions(NUM_FACTIONS)
   tiles = generate_tiles(factions, GRID_WIDTH, GRID_HEIGHT)
   creatures = generate_creatures(tiles, CREATURE_SPAWN_RATE)
-  generate_cities(tiles, CITY_POPULATION_THRESHOLD)
+  cities = generate_cities(tiles, CITY_POPULATION_THRESHOLD)
+  heroes = []
+
+  world = World.new(factions, tiles, cities, heroes)
 
   generate_seasons(NUM_SEASONS).map { |season|
-    world_events(season) + creature_events(creatures, factions)
+    world_events(season) + creature_events(creatures, world)
   }.flatten
 end
 

@@ -52,17 +52,27 @@ class MainTest < Minitest::Test
     tile = Tile.new
     tile.population = 1
     creature = new_creature(tile)
+    world = build_world(factions: [INDEPENDANT], cities: [City.new("city-name", tile)])
 
-    actual = creature_events([creature], [INDEPENDANT])
+    actual = creature_events([creature], world)
 
     assert_kind_of(Event, actual.first)
   end
 
   def test_main
-    assert_operator(100, :<, main.count)
+    assert_operator(50, :<, main.count)
   end
 
   def build_tile(population:)
     Tile.new(:grassland, "tile name", population)
+  end
+
+  def build_world(options = {})
+    World.new(
+      options.fetch(:factions, []),
+      options.fetch(:tiles, []),
+      options.fetch(:cities, []),
+      options.fetch(:heroes, []),
+    )
   end
 end
