@@ -82,17 +82,17 @@ def generate_tiles(factions, width, height)
   end
 end
 
-def new_creature(tile)
-  Actor.new(random_race, random_name("creature"), :evil, INDEPENDANT, tile)
+def build_creature(options = {})
+  Actor.new(random_race, random_name("creature"), :evil, INDEPENDANT, options.fetch(:tile))
 end
 
-def new_hero(faction, tile)
-  Actor.new(random_race, random_name("hero"), :good, faction, tile)
+def build_hero(options = {})
+  Actor.new(random_race, random_name("hero"), :good, options.fetch(:faction), options.fetch(:tile))
 end
 
 def generate_creatures(tiles, chance_to_spawn)
   tiles.flatten.map { |tile|
-    new_creature(tile) if rand > chance_to_spawn
+    build_creature(tile: tile) if rand > chance_to_spawn
   }.compact
 end
 

@@ -1,7 +1,7 @@
 def ambush_action(world, season, tile, protagonist)
   return unless protagonist.active?
 
-  subject = new_hero(world.factions.sample, tile)
+  subject = build_hero(faction: world.factions.sample, tile: tile)
   winner, looser = [protagonist, subject].shuffle
   looser.dead_at = season
   Event.new("#{winner.name} killed #{looser.name} in combat")
@@ -10,7 +10,7 @@ end
 def kidnap_action(world, season, tile, protagonist)
   return unless protagonist.active?
 
-  subject = new_hero(world.factions.sample, tile)
+  subject = build_hero(faction: world.factions.sample, tile: tile)
   subject.confined_at = protagonist
   Event.new("#{subject.name} was kidnapped by #{protagonist.name}")
 end

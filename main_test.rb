@@ -57,7 +57,7 @@ class MainTest < Minitest::Test
   end
 
   def test_main
-    assert_operator(50, :<, main.count)
+    assert_operator(20, :<, main.count)
   end
 
   def build_tile(population:)
@@ -71,7 +71,7 @@ class MainTest < Minitest::Test
     build_world(
       factions: [INDEPENDANT],
       sites: [Site.new("site-name", tile)],
-      creatures: [new_creature(tile)]
+      creatures: [build_creature(tile: tile)]
     )
   end
 

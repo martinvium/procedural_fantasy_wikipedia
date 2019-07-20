@@ -57,7 +57,7 @@ class ActionsTest < Minitest::Test
       factions: [INDEPENDANT],
       tiles: [tile],
       sites: [Site.new("site-name", tile)],
-      creatures: [new_creature(tile)]
+      creatures: [build_creature(tile: tile)]
     )
   end
 
