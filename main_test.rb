@@ -1,3 +1,4 @@
+require "pry"
 require "minitest/autorun"
 require_relative "main"
 
@@ -49,13 +50,9 @@ class MainTest < Minitest::Test
   end
 
   def test_creature_events
-    tile = Tile.new
-    tile.population = 1
-    creature = new_creature(tile)
-    world = build_world(factions: [INDEPENDANT], sites: [Site.new("site-name", tile)])
-
-    actual = creature_events([creature], world)
-
+    season = Season.new("test-season")
+    world = build_simple_world
+    actual = creature_events(world, season)
     assert_kind_of(Event, actual.first)
   end
 
@@ -67,12 +64,24 @@ class MainTest < Minitest::Test
     Tile.new(:grassland, "tile name", population)
   end
 
+  def build_simple_world
+    tile = Tile.new("test-tile")
+    tile.population = 1
+
+    build_world(
+      factions: [INDEPENDANT],
+      sites: [Site.new("site-name", tile)],
+      creatures: [new_creature(tile)]
+    )
+  end
+
   def build_world(options = {})
     World.new(
       options.fetch(:factions, []),
       options.fetch(:tiles, []),
       options.fetch(:sites, []),
       options.fetch(:heroes, []),
+      options.fetch(:creatures, []),
     )
   end
 end

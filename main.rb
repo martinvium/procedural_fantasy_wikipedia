@@ -10,12 +10,12 @@ CREATURE_SPAWN_RATE = 0.9
 
 Faction = Struct.new(:name)
 Tile = Struct.new(:terrain, :name, :population, :faction, :x, :y)
-Actor = Struct.new(:race, :name, :alignment, :faction, :tile)
+Actor = Struct.new(:race, :name, :alignment, :faction, :tile, :dead_at)
 Race = Struct.new(:name, :description)
 Site = Struct.new(:name, :tile)
 Season = Struct.new(:name)
 Event = Struct.new(:title)
-World = Struct.new(:factions, :tiles, :sites, :heroes)
+World = Struct.new(:factions, :tiles, :sites, :heroes, :creatures)
 
 INDEPENDANT = Faction.new("independant")
 
@@ -26,18 +26,19 @@ SEASONS = [
   Season.new("Spring"),
 ]
 
-def ambush_action(world, tile, protagonist)
+def ambush_action(world, season, tile, protagonist)
   subject = new_hero(world.factions.sample, tile)
   winner, looser = [protagonist, subject].shuffle
+  looser.dead_at = season
   Event.new("#{winner.name} killed #{looser.name} in combat")
 end
 
-def kidnap_action(world, tile, protagonist)
+def kidnap_action(world, season, tile, protagonist)
   subject = new_hero(world.factions.sample, tile)
   Event.new("#{subject.name} was kidnapped by #{protagonist.name}")
 end
 
-def raze_site_action(world, tile, protagonist)
+def raze_site_action(world, season, tile, protagonist)
   site = world.sites.find { |site| site.tile === tile }
   return if site.nil?
 
@@ -108,10 +109,10 @@ def world_events(season)
   ]
 end
 
-def creature_events(creatures, world)
-  creatures.map do |creature|
-    CREATURE_ACTIONS.sample.call(world, creature.tile, creature)
-  end.compact
+def creature_events(world, season)
+  world.creatures.map { |creature|
+    CREATURE_ACTIONS.sample.call(world, season, creature.tile, creature)
+  }.compact
 end
 
 def main
@@ -121,10 +122,10 @@ def main
   sites = generate_sites(tiles, SITE_POP_THRESHOLD)
   heroes = []
 
-  world = World.new(factions, tiles, sites, heroes)
+  world = World.new(factions, tiles, sites, heroes, creatures)
 
   generate_seasons(NUM_SEASONS).map { |season|
-    world_events(season) + creature_events(creatures, world)
+    world_events(season) + creature_events(world, season)
   }.flatten
 end
 
