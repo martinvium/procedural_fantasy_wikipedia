@@ -50,8 +50,8 @@ CREATURE_ACTIONS = [
   method(:raze_city_action),
 ]
 
-def random_name
-  SecureRandom.uuid
+def random_name(prefix)
+  "#{prefix}-#{SecureRandom.uuid}"
 end
 
 def generate_population
@@ -66,24 +66,24 @@ end
 
 def generate_factions(num_factions)
   (0...num_factions).map do
-    Faction.new(random_name)
+    Faction.new(random_name("faction"))
   end
 end
 
 def generate_tiles(factions, width, height)
   (0...width).map do |x|
     (0...height).map do |y|
-      Tile.new(:grassland, random_name, generate_population, factions.sample, x, y)
+      Tile.new(:grassland, random_name("tile"), generate_population, factions.sample, x, y)
     end
   end
 end
 
 def new_creature(tile)
-  Actor.new(random_race, random_name, :evil, INDEPENDANT, tile)
+  Actor.new(random_race, random_name("creature"), :evil, INDEPENDANT, tile)
 end
 
 def new_hero(faction, tile)
-  Actor.new(random_race, random_name, :good, faction, tile)
+  Actor.new(random_race, random_name("hero"), :good, faction, tile)
 end
 
 def generate_creatures(tiles, chance_to_spawn)
@@ -94,7 +94,7 @@ end
 
 def generate_cities(tiles, threshold)
   tiles.flatten.map { |tile|
-    City.new(random_name, tile) if tile.population > threshold
+    City.new(random_name("city"), tile) if tile.population > threshold
   }.compact
 end
 
