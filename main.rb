@@ -25,16 +25,20 @@ SEASONS = [
   Season.new("Spring"),
 ]
 
-CREATURE_EVENTS = [
-  lambda { |factions, tile, creature|
-    subject = new_hero(factions.sample, tile)
-    winner, looser = [creature, subject].shuffle
-    Event.new("#{winner.name} killed #{looser.name} in combat")
-  },
-  lambda { |factions, tile, creature|
-    subject = new_hero(factions.sample, tile)
-    Event.new("#{subject.name} was kidnapped by #{creature.name}")
-  },
+def attack_action(factions, tile, protagonist)
+  subject = new_hero(factions.sample, tile)
+  winner, looser = [protagonist, subject].shuffle
+  Event.new("#{winner.name} killed #{looser.name} in combat")
+end
+
+def kidnap_action(factions, tile, protagonist)
+  subject = new_hero(factions.sample, tile)
+  Event.new("#{subject.name} was kidnapped by #{protagonist.name}")
+end
+
+CREATURE_ACTIONS = [
+  method(:attack_action),
+  method(:kidnap_action),
 ]
 
 def random_name
@@ -97,7 +101,7 @@ end
 
 def creature_events(creatures, factions)
   creatures.map do |creature|
-    CREATURE_EVENTS.sample.call(factions, creature.tile, creature)
+    CREATURE_ACTIONS.sample.call(factions, creature.tile, creature)
   end
 end
 
