@@ -18,14 +18,14 @@ class MainTest < Minitest::Test
     assert_kind_of(Faction, generate_factions(1).first)
   end
 
-  def test_generates_city
+  def test_generates_site
     tiles = [build_tile(population: 150)]
-    assert_kind_of(City, generate_cities(tiles, 100).first)
+    assert_kind_of(Site, generate_sites(tiles, 100).first)
   end
 
-  def test_skips_city_when_below_threshold
+  def test_skips_site_when_below_threshold
     tiles = [build_tile(population: 50)]
-    assert_nil(generate_cities(tiles, 100).first)
+    assert_nil(generate_sites(tiles, 100).first)
   end
 
   def test_generate_seasons
@@ -52,7 +52,7 @@ class MainTest < Minitest::Test
     tile = Tile.new
     tile.population = 1
     creature = new_creature(tile)
-    world = build_world(factions: [INDEPENDANT], cities: [City.new("city-name", tile)])
+    world = build_world(factions: [INDEPENDANT], sites: [Site.new("site-name", tile)])
 
     actual = creature_events([creature], world)
 
@@ -71,7 +71,7 @@ class MainTest < Minitest::Test
     World.new(
       options.fetch(:factions, []),
       options.fetch(:tiles, []),
-      options.fetch(:cities, []),
+      options.fetch(:sites, []),
       options.fetch(:heroes, []),
     )
   end

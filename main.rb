@@ -4,7 +4,7 @@ GRID_HEIGHT = 12
 GRID_WIDTH = 12
 MAX_PEOPLE = 100
 NUM_FACTIONS = 3
-CITY_POPULATION_THRESHOLD = 50
+SITE_POP_THRESHOLD = 50
 NUM_SEASONS = 8
 CREATURE_SPAWN_RATE = 0.9
 
@@ -12,10 +12,10 @@ Faction = Struct.new(:name)
 Tile = Struct.new(:terrain, :name, :population, :faction, :x, :y)
 Actor = Struct.new(:race, :name, :alignment, :faction, :tile)
 Race = Struct.new(:name, :description)
-City = Struct.new(:name, :tile)
+Site = Struct.new(:name, :tile)
 Season = Struct.new(:name)
 Event = Struct.new(:title)
-World = Struct.new(:factions, :tiles, :cities, :heroes)
+World = Struct.new(:factions, :tiles, :sites, :heroes)
 
 INDEPENDANT = Faction.new("independant")
 
@@ -26,7 +26,7 @@ SEASONS = [
   Season.new("Spring"),
 ]
 
-def attack_action(world, tile, protagonist)
+def ambush_action(world, tile, protagonist)
   subject = new_hero(world.factions.sample, tile)
   winner, looser = [protagonist, subject].shuffle
   Event.new("#{winner.name} killed #{looser.name} in combat")
@@ -37,17 +37,17 @@ def kidnap_action(world, tile, protagonist)
   Event.new("#{subject.name} was kidnapped by #{protagonist.name}")
 end
 
-def raze_city_action(world, tile, protagonist)
-  city = world.cities.find { |city| city.tile === tile }
-  return if city.nil?
+def raze_site_action(world, tile, protagonist)
+  site = world.sites.find { |site| site.tile === tile }
+  return if site.nil?
 
-  Event.new("#{protagonist.name} attacked the city of #{city.name}, during the dark of night, and razed it to the ground")
+  Event.new("#{protagonist.name} attacked the site of #{site.name}, during the dark of night, and razed it to the ground")
 end
 
 CREATURE_ACTIONS = [
-  method(:attack_action),
+  method(:ambush_action),
   method(:kidnap_action),
-  method(:raze_city_action),
+  method(:raze_site_action),
 ]
 
 def random_name(prefix)
@@ -92,9 +92,9 @@ def generate_creatures(tiles, chance_to_spawn)
   }.compact
 end
 
-def generate_cities(tiles, threshold)
+def generate_sites(tiles, threshold)
   tiles.flatten.map { |tile|
-    City.new(random_name("city"), tile) if tile.population > threshold
+    Site.new(random_name("site"), tile) if tile.population > threshold
   }.compact
 end
 
@@ -118,10 +118,10 @@ def main
   factions = generate_factions(NUM_FACTIONS)
   tiles = generate_tiles(factions, GRID_WIDTH, GRID_HEIGHT)
   creatures = generate_creatures(tiles, CREATURE_SPAWN_RATE)
-  cities = generate_cities(tiles, CITY_POPULATION_THRESHOLD)
+  sites = generate_sites(tiles, SITE_POP_THRESHOLD)
   heroes = []
 
-  world = World.new(factions, tiles, cities, heroes)
+  world = World.new(factions, tiles, sites, heroes)
 
   generate_seasons(NUM_SEASONS).map { |season|
     world_events(season) + creature_events(creatures, world)
