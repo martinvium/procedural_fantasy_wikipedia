@@ -54,7 +54,7 @@ HERO_ACTIONS = [
   method(:escape_confinement_action),
 ]
 
-def random_name(prefix)
+def generate_name(prefix)
   "#{prefix}-#{SecureRandom.uuid}"
 end
 
@@ -64,30 +64,30 @@ def generate_population
   rand(MAX_PEOPLE)
 end
 
-def random_race
+def generate_race
   Race.new(:monster, "head of a chicken, body of a squirrel and claws of a tiger")
 end
 
 def generate_factions(num_factions)
   (0...num_factions).map do
-    Faction.new(random_name("faction"))
+    Faction.new(generate_name("faction"))
   end
 end
 
 def generate_tiles(factions, width, height)
   (0...width).map do |x|
     (0...height).map do |y|
-      Tile.new(:grassland, random_name("tile"), generate_population, factions.sample, x, y)
+      Tile.new(:grassland, generate_name("tile"), generate_population, factions.sample, x, y)
     end
   end
 end
 
 def build_creature(options = {})
-  Actor.new(random_race, random_name("creature"), :evil, INDEPENDANT, options.fetch(:tile))
+  Actor.new(generate_race, generate_name("creature"), :evil, INDEPENDANT, options.fetch(:tile))
 end
 
 def build_hero(options = {})
-  Actor.new(random_race, random_name("hero"), :good, options.fetch(:faction), options.fetch(:tile))
+  Actor.new(generate_race, generate_name("hero"), :good, options.fetch(:faction), options.fetch(:tile))
 end
 
 def generate_creatures(tiles, chance_to_spawn)
@@ -98,7 +98,7 @@ end
 
 def generate_sites(tiles, threshold)
   tiles.flatten.map { |tile|
-    Site.new(random_name("site"), tile) if tile.population > threshold
+    Site.new(generate_name("site"), tile) if tile.population > threshold
   }.compact
 end
 
