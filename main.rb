@@ -111,7 +111,7 @@ end
 def creature_events(creatures, world)
   creatures.map do |creature|
     CREATURE_ACTIONS.sample.call(world, creature.tile, creature)
-  end
+  end.compact
 end
 
 def main
