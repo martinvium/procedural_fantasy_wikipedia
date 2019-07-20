@@ -1,4 +1,5 @@
 require "securerandom"
+require_relative "actions"
 
 GRID_HEIGHT = 12
 GRID_WIDTH = 12
@@ -21,7 +22,14 @@ Actor = Struct.new(:race, :name, :alignment, :faction, :tile, :dead_at, :confine
 }
 
 Race = Struct.new(:name, :description)
-Site = Struct.new(:name, :tile)
+Site = Struct.new(:name, :tile) {
+  def tile?(other_tile)
+    return false if other_tile.nil?
+    return false if tile.nil?
+
+    other_tile === tile
+  end
+}
 Season = Struct.new(:name)
 Event = Struct.new(:title)
 World = Struct.new(:factions, :tiles, :sites, :heroes, :creatures)
@@ -34,40 +42,6 @@ SEASONS = [
   Season.new("Winter"),
   Season.new("Spring"),
 ]
-
-def ambush_action(world, season, tile, protagonist)
-  return unless protagonist.active?
-
-  subject = new_hero(world.factions.sample, tile)
-  winner, looser = [protagonist, subject].shuffle
-  looser.dead_at = season
-  Event.new("#{winner.name} killed #{looser.name} in combat")
-end
-
-def kidnap_action(world, season, tile, protagonist)
-  return unless protagonist.active?
-
-  subject = new_hero(world.factions.sample, tile)
-  Event.new("#{subject.name} was kidnapped by #{protagonist.name}")
-  subject.confined_at = protagonist
-end
-
-def raze_site_action(world, season, tile, protagonist)
-  return unless protagonist.active?
-
-  site = world.sites.find { |site| site.tile === tile }
-  return if site.nil?
-
-  Event.new("#{protagonist.name} attacked the site of #{site.name}, during the dark of night, and razed it to the ground")
-end
-
-def escape_confinement_action(world, season, tile, protagonist)
-  return if protagonist.dead?
-  return if protagonist.confined_at.nil?
-
-  Event.new("#{protagonist.name} escaped confinement at #{protagonist.confined_at}")
-  protagonist.confined_at = nil
-end
 
 CREATURE_ACTIONS = [
   method(:ambush_action),
