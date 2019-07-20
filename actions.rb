@@ -32,3 +32,15 @@ def escape_confinement_action(world, season, tile, protagonist)
   protagonist.confined_at = nil
   Event.new("#{protagonist.name} escaped confinement at #{was_confined_at}")
 end
+
+def rescue_confined_action(world, season, tile, protagonist)
+  return unless protagonist.active?
+
+  subjects = world.hero.select { |hero| hero.tile?(tile) }
+  subject = subjects.find { |hero| !hero.confined_at.nil? }
+  return if subject.nil?
+
+  was_confined_at = protagonist.confined_at
+  subject.confined_at = nil
+  Event.new("#{protagonist.name} rescued #{subject.name} from confinement at #{was_confined_at}")
+end

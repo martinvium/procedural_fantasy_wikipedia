@@ -57,7 +57,7 @@ class ActionsTest < Minitest::Test
       factions: [INDEPENDANT],
       tiles: [tile],
       sites: [Site.new("site-name", tile)],
-      creatures: [build_creature(tile: tile)]
+      actors: [build_creature(tile: tile)]
     )
   end
 
@@ -70,8 +70,7 @@ class ActionsTest < Minitest::Test
       options.fetch(:factions, []),
       options.fetch(:tiles, []),
       options.fetch(:sites, []),
-      options.fetch(:heroes, []),
-      options.fetch(:creatures, []),
+      options.fetch(:actors, []),
     )
   end
 end

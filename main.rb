@@ -33,7 +33,7 @@ Site = Struct.new(:name, :tile) {
 }
 Season = Struct.new(:name)
 Event = Struct.new(:title)
-World = Struct.new(:factions, :tiles, :sites, :heroes, :creatures)
+World = Struct.new(:factions, :tiles, :sites, :actors)
 
 INDEPENDANT = Faction.new("independant")
 
@@ -44,16 +44,18 @@ SEASONS = [
   Season.new("Spring"),
 ]
 
-CREATURE_ACTIONS = [
-  method(:ambush_action),
-  method(:kidnap_action),
-  method(:raze_site_action),
-  method(:escape_confinement_action),
-]
-
-HERO_ACTIONS = [
-  method(:escape_confinement_action),
-]
+ACTOR_ACTIONS = {
+  evil: [
+    method(:ambush_action),
+    method(:kidnap_action),
+    method(:raze_site_action),
+    method(:escape_confinement_action),
+  ],
+  good: [
+    method(:escape_confinement_action),
+    method(:rescue_confined_action),
+  ],
+}
 
 def build_creature(options = {})
   Actor.new(generate_race, generate_name("creature"), :evil, INDEPENDANT, options.fetch(:tile))
@@ -69,9 +71,11 @@ def world_events(season)
   ]
 end
 
-def creature_events(world, season)
-  world.creatures.map { |creature|
-    CREATURE_ACTIONS.sample.call(world, season, creature.tile, creature)
+def actor_events(world, season)
+  world.actors.map { |actor|
+    available_actions = ACTOR_ACTIONS.fetch(actor.alignment)
+    action = available_actions.sample
+    action.call(world, season, actor.tile, actor)
   }.compact
 end
 
@@ -80,12 +84,11 @@ def main
   tiles = generate_tiles(factions, GRID_WIDTH, GRID_HEIGHT)
   creatures = generate_creatures(tiles, CREATURE_SPAWN_RATE)
   sites = generate_sites(tiles, SITE_POP_THRESHOLD)
-  heroes = []
 
-  world = World.new(factions, tiles, sites, heroes, creatures)
+  world = World.new(factions, tiles, sites, creatures)
 
   generate_seasons(NUM_SEASONS).map { |season|
-    world_events(season) + creature_events(world, season)
+    world_events(season) + actor_events(world, season)
   }.flatten
 end
 

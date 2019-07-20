@@ -49,13 +49,6 @@ class MainTest < Minitest::Test
     )
   end
 
-  def test_creature_events
-    season = Season.new("test-season")
-    world = build_simple_world
-    actual = creature_events(world, season)
-    assert_kind_of(Event, actual.first)
-  end
-
   def test_main
     assert_operator(20, :<, main.count)
   end
@@ -80,8 +73,7 @@ class MainTest < Minitest::Test
       options.fetch(:factions, []),
       options.fetch(:tiles, []),
       options.fetch(:sites, []),
-      options.fetch(:heroes, []),
-      options.fetch(:creatures, []),
+      options.fetch(:actors, []),
     )
   end
 end
