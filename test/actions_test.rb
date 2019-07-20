@@ -36,6 +36,19 @@ class ActionsTest < Minitest::Test
     assert_nil escape_confinement_action(nil, nil, nil, build_actor(dead_at: Season.new))
   end
 
+  def test_rescue_confined_action_returns_event
+    tile = build_tile
+    world = build_simple_world
+    world.actors << build_actor(confined_at: Actor.new, tile: tile)
+    season = Season.new("test-season")
+    event = rescue_confined_action(world, season, tile, build_actor)
+    assert_kind_of(Event, event)
+  end
+
+  def test_rescue_confined_action_returns_nil_when_protagonist_is_dead
+    assert_nil rescue_confined_action(nil, nil, nil, build_actor(dead_at: Season.new))
+  end
+
   private
 
   def build_actor(options = {})
@@ -51,7 +64,7 @@ class ActionsTest < Minitest::Test
   end
 
   def build_simple_world
-    tile = build_tile(pop: 1)
+    tile = build_tile(population: 1)
 
     build_world(
       factions: [INDEPENDANT],
@@ -61,8 +74,8 @@ class ActionsTest < Minitest::Test
     )
   end
 
-  def build_tile(pop:)
-    Tile.new(:grassland, "tile name", pop)
+  def build_tile(options = {})
+    Tile.new(:grassland, "tile name", options.fetch(:population, 1))
   end
 
   def build_world(options = {})

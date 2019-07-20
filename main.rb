@@ -23,14 +23,7 @@ Actor = Struct.new(:race, :name, :alignment, :faction, :tile, :dead_at, :confine
 }
 
 Race = Struct.new(:name, :description)
-Site = Struct.new(:name, :tile) {
-  def tile?(other_tile)
-    return false if other_tile.nil?
-    return false if tile.nil?
-
-    other_tile === tile
-  end
-}
+Site = Struct.new(:name, :tile) {}
 Season = Struct.new(:name)
 Event = Struct.new(:title)
 World = Struct.new(:factions, :tiles, :sites, :actors)
@@ -56,6 +49,12 @@ ACTOR_ACTIONS = {
     method(:rescue_confined_action),
   ],
 }
+
+def same_tile?(a, b)
+  return false if a.nil? || b.nil?
+
+  a === b
+end
 
 def build_creature(options = {})
   Actor.new(generate_race, generate_name("creature"), :evil, INDEPENDANT, options.fetch(:tile))
