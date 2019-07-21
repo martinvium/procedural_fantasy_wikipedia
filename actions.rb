@@ -1,7 +1,7 @@
 def ambush_action(world, season, tile, protagonist)
   return unless protagonist.active?
 
-  subject = (world.actors << build_hero(faction: world.factions.sample, tile: tile)).last
+  subject = (world.actors << build_hero(faction: world.factions.sample, tile: tile, state: :fixed)).last
   winner, looser = [protagonist, subject].shuffle
   looser.dead_at = season
   Event.new("#{winner.name} killed #{looser.name} in combat")
@@ -10,7 +10,7 @@ end
 def kidnap_action(world, season, tile, protagonist)
   return unless protagonist.active?
 
-  subject = (world.actors << build_hero(faction: world.factions.sample, tile: tile)).last
+  subject = (world.actors << build_hero(faction: world.factions.sample, tile: tile, state: :fixed)).last
   subject.confined_at = protagonist
   Event.new("#{subject.name} was kidnapped by #{protagonist.name}")
 end
@@ -43,4 +43,12 @@ def rescue_confined_action(world, season, tile, protagonist)
   was_confined_at = protagonist.confined_at
   subject.confined_at = nil
   Event.new("#{protagonist.name} rescued #{subject.name} from confinement at #{was_confined_at}")
+end
+
+def build_lair_action(world, season, tile, protagonist)
+  raise "todo"
+end
+
+def assist_site_action(world, season, tile, protagonist)
+  raise "todo"
 end

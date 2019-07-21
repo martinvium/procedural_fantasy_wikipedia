@@ -12,7 +12,7 @@ CREATURE_SPAWN_RATE = 0.9
 
 Faction = Struct.new(:name)
 Tile = Struct.new(:terrain, :name, :population, :faction, :x, :y)
-Actor = Struct.new(:race, :name, :alignment, :faction, :tile, :dead_at, :confined_at) {
+Actor = Struct.new(:race, :name, :alignment, :faction, :tile, :dead_at, :confined_at, :state) {
   def active?
     dead_at.nil? && confined_at.nil?
   end
@@ -57,11 +57,37 @@ def same_tile?(a, b)
 end
 
 def build_creature(options = {})
-  Actor.new(generate_race, generate_name("creature"), :evil, INDEPENDANT, options.fetch(:tile))
+  build_actor(
+    race: generate_race,
+    name: generate_name("creature"),
+    alignment: :evil,
+    faction: INDEPENDANT,
+    tile: options.fetch(:tile),
+    state: :searching
+  )
 end
 
 def build_hero(options = {})
-  Actor.new(generate_race, generate_name("hero"), :good, options.fetch(:faction), options.fetch(:tile))
+  build_actor(
+    race: generate_race,
+    name: generate_name("hero"),
+    alignment: :good,
+    faction: options.fetch(:faction),
+    tile: options.fetch(:tile),
+    state: options.fetch(:state)
+  )
+end
+
+def build_actor(options = {})
+  Actor.new(
+    options[:face],
+    options[:name],
+    options[:alignment],
+    options[:faction],
+    options[:tile],
+    options[:dead_at],
+    options[:confined_at],
+  )
 end
 
 def world_events(season)

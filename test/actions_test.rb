@@ -28,7 +28,7 @@ class ActionsTest < Minitest::Test
   end
 
   def test_escape_confinement_action_returns_event
-    event = escape_confinement_action(nil, nil, nil, build_actor(confined_at: Actor.new))
+    event = escape_confinement_action(nil, nil, nil, build_actor(confined_at: build_actor))
     assert_kind_of(Event, event)
   end
 
@@ -39,7 +39,7 @@ class ActionsTest < Minitest::Test
   def test_rescue_confined_action_returns_event
     tile = build_tile
     world = build_simple_world
-    world.actors << build_actor(confined_at: Actor.new, tile: tile)
+    world.actors << build_actor(confined_at: build_actor, tile: tile)
     season = Season.new("test-season")
     event = rescue_confined_action(world, season, tile, build_actor)
     assert_kind_of(Event, event)
@@ -50,18 +50,6 @@ class ActionsTest < Minitest::Test
   end
 
   private
-
-  def build_actor(options = {})
-    Actor.new(
-      options[:face],
-      options[:name],
-      options[:alignment],
-      options[:faction],
-      options[:tile],
-      options[:dead_at],
-      options[:confined_at],
-    )
-  end
 
   def build_simple_world
     tile = build_tile(population: 1)
