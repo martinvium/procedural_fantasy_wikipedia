@@ -138,7 +138,9 @@ def actor_events(world, season)
   }.compact
 end
 
-def main
+def main(seed)
+  srand(seed)
+
   factions = generate_factions(NUM_FACTIONS)
   tiles = generate_tiles(factions, GRID_WIDTH, GRID_HEIGHT)
   creatures = generate_creatures(tiles, CREATURE_SPAWN_RATE)
@@ -152,7 +154,10 @@ def main
 end
 
 if $0 == __FILE__
-  main.each do |event|
+  seed = (ARGV[0] || Time.now).to_i
+  puts "Run with: ruby main.rb #{seed}"
+
+  main(seed).each do |event|
     puts event.title
   end
 end

@@ -50,7 +50,8 @@ class MainTest < Minitest::Test
   end
 
   def test_main
-    assert_operator(20, :<, main.count)
+    seed = 1234
+    assert_operator(20, :<, main(seed).count)
   end
 
   def test_valid_move_positions_returns_all_options
