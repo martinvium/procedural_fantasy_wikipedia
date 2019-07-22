@@ -23,10 +23,11 @@ Actor = Struct.new(:race, :name, :alignment, :faction, :tile, :dead_at, :confine
 }
 
 Race = Struct.new(:name, :description)
-Site = Struct.new(:name, :tile) {}
+Site = Struct.new(:name, :tile, :founded_by)
 Season = Struct.new(:name)
 Event = Struct.new(:title)
 World = Struct.new(:factions, :tiles, :sites, :actors)
+Position = Struct.new(:x, :y)
 
 INDEPENDANT = Faction.new("independant")
 
@@ -38,16 +39,29 @@ SEASONS = [
 ]
 
 ACTOR_ACTIONS = {
-  evil: [
-    method(:ambush_action),
-    method(:kidnap_action),
-    method(:raze_site_action),
-    method(:escape_confinement_action),
-  ],
-  good: [
-    method(:escape_confinement_action),
-    method(:rescue_confined_action),
-  ],
+  evil: {
+    exploring: [
+      method(:ambush_action),
+      method(:kidnap_action),
+      method(:raze_site_action),
+      method(:build_lair_action),
+    ],
+    resting: [
+      method(:escape_confinement_action),
+    ],
+    fleeing: [],
+  },
+  good: {
+    exploring: [
+      method(:rescue_confined_action),
+    ],
+    resting: [
+      method(:escape_confinement_action),
+    ],
+    fleeing: [
+      method(:flee_action),
+    ],
+  },
 }
 
 def same_tile?(a, b)
@@ -63,7 +77,7 @@ def build_creature(options = {})
     alignment: :evil,
     faction: INDEPENDANT,
     tile: options.fetch(:tile),
-    state: :searching
+    state: :exploring
   )
 end
 
@@ -87,7 +101,25 @@ def build_actor(options = {})
     options[:tile],
     options[:dead_at],
     options[:confined_at],
+    options.fetch(:state, :exploring)
   )
+end
+
+def build_site(options = {})
+  Site.new(
+    options.fetch(:name, generate_name("site")),
+    options.fetch(:tile),
+    options[:founded_by]
+  )
+end
+
+def valid_move_positions(curr_pos)
+  [
+    Position.new((curr_pos.x - 1).clamp(0, GRID_WIDTH - 1), curr_pos.y),
+    Position.new((curr_pos.x + 1).clamp(0, GRID_WIDTH - 1), curr_pos.y),
+    Position.new(curr_pos.x, (curr_pos.y - 1).clamp(0, GRID_HEIGHT - 1)),
+    Position.new(curr_pos.x, (curr_pos.y + 1).clamp(0, GRID_HEIGHT - 1)),
+  ].reject { |option| option == curr_pos }
 end
 
 def world_events(season)
@@ -98,8 +130,10 @@ end
 
 def actor_events(world, season)
   world.actors.map { |actor|
-    available_actions = ACTOR_ACTIONS.fetch(actor.alignment)
+    available_actions = ACTOR_ACTIONS.fetch(actor.alignment).fetch(actor.state)
     action = available_actions.sample
+    next if action.nil?
+
     action.call(world, season, actor.tile, actor)
   }.compact
 end

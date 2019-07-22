@@ -53,6 +53,40 @@ class MainTest < Minitest::Test
     assert_operator(20, :<, main.count)
   end
 
+  def test_valid_move_positions_returns_all_options
+    assert_equal(
+      [
+        Position.new(4, 5),
+        Position.new(6, 5),
+        Position.new(5, 4),
+        Position.new(5, 6),
+      ],
+      valid_move_positions(Position.new(5, 5))
+    )
+  end
+
+  def test_valid_move_positions_returns_only_unique_clamped_max_values
+    assert_equal(
+      [
+        Position.new(10, 11),
+        Position.new(11, 10),
+      ],
+      valid_move_positions(Position.new(GRID_WIDTH - 1, GRID_HEIGHT - 1))
+    )
+  end
+
+  def test_valid_move_positions_returns_only_unique_clamped_min_values
+    assert_equal(
+      [
+        Position.new(1, 0),
+        Position.new(0, 1),
+      ],
+      valid_move_positions(Position.new(0, 0))
+    )
+  end
+
+  private
+
   def build_tile(population:)
     Tile.new(:grassland, "tile name", population)
   end
